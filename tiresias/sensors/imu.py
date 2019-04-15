@@ -24,8 +24,8 @@ class IMUSensor(SensorBase):
                     raise RuntimeError("cannot startup BNO055 sensor")
                 time.sleep(1)
 
-        status, self_test, error = bno.get_system_status()
-        self.logging.info("status: {}, self_test: {}, error: {}".format(status, self_test, error))
+        status, self_test, error = self.bno.get_system_status()
+        self.logger.info("status: {}, self_test: {}, error: {}".format(status, self_test, error))
         super().setup()
 
     def read(self):
