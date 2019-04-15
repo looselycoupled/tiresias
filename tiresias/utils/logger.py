@@ -1,4 +1,4 @@
-# tiresias.utils.logging
+# tiresias.utils.logger
 # Logging mixin classes for convenience and central configuration
 #
 # Author:   Allen Leis <allen.leis@gmail.com>
@@ -7,7 +7,7 @@
 # Copyright (C) 2019 Allen Leis
 # For license information, see LICENSE
 #
-# ID: loggin.py [] allen.leis@gmail.com $
+# ID: logger.py [] allen.leis@gmail.com $
 
 """
 Logging mixin classes for convenience and central configuration

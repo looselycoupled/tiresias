@@ -1,4 +1,4 @@
-from tiresias.utils.logging import LoggableMixin
+from tiresias.utils.logger import LoggableMixin
 
 class SensorBase(LoggableMixin):
 
