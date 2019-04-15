@@ -81,7 +81,7 @@ class LoggableMixin(object):
     def __init__(self, *args, **kwargs):
         logging.config.dictConfig(logging_config)
         self.logger = logging.getLogger('tiresias')
-        super().__init__(*args, **kwargs)
+        super(LoggableMixin, self).__init__(*args, **kwargs)
 
 
 ##########################################################################
