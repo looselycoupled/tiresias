@@ -9,9 +9,8 @@ class SensorBase(LoggableMixin):
     def setup(self):
         self._configured = True
 
-    def teardown(self):
+    def shutdown(self):
         pass
-
 
     def read(self):
         raise NotImplementedError()
