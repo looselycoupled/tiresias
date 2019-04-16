@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 
 from tiresias.sensors.imu import IMUSensor
 from tiresias.sensors.distance import UltrasonicRangingSensor
-
+from tiresias.manager import Manager
 
 def basic_test():
     imu = IMUSensor()
@@ -59,6 +59,10 @@ def mp_test():
     print("exiting")
 
 
+def manager_test():
+    sensors = [IMUSensor(), UltrasonicRangingSensor()]
+    manager = Manager(sensors, [])
+    manager.start()
 
 if __name__ == "__main__":
-    mp_test()
+    manager_test()

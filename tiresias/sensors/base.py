@@ -10,7 +10,7 @@ class SensorBase(LoggableMixin):
         self._ready = True
 
     def shutdown(self):
-        pass
+        self.logger.info("{}: shutdown complete".format(self.__class__.__name__))
 
     def read(self):
         raise NotImplementedError()

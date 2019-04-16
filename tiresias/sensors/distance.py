@@ -86,6 +86,7 @@ class UltrasonicRangingSensor(SensorBase):
         """
         self.logger.info("UltrasonicRangingSensor: cleaning up GPIO")
         GPIO.cleanup()
+        super(UltrasonicRangingSensor, self).shutdown()
 
 
     def monitor(self, command, output):
@@ -104,11 +105,15 @@ class UltrasonicRangingSensor(SensorBase):
             consumed by another process thread.
         """
 
-        while True:
-            cmd = command.get()
-            if cmd is None:
-                break
-            data = self.read()
-            output.put(data)
+        try:
+            while True:
+                cmd = command.get()
+                if cmd is None:
+                    self.logger.info("UltrasonicRangingSensor: exiting monitor")
+                    break
+                data = self.read()
+                output.put(data)
+        except KeyboardInterrupt:
+            pass
 
         self.shutdown()
