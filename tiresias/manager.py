@@ -2,7 +2,6 @@ import time
 import multiprocessing as mp
 from tiresias.utils.logger import LoggableMixin
 
-
 SAMPLE_LOGGING_INTERVAL = 100
 SAMPLE_DURATION = 0.0096
 

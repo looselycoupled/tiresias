@@ -7,7 +7,6 @@ from tiresias.sensors.distance import UltrasonicRangingSensor
 from tiresias.manager import Manager
 from tiresias.consumers import JSONConsumer
 
-
 def basic_test():
     imu = IMUSensor()
     imu.setup()
