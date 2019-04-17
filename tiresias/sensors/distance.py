@@ -51,6 +51,7 @@ class UltrasonicRangingSensor(SensorBase):
         try:
             self._signal()
 
+            pulse_start_time = time.time()
             while GPIO.input(PIN_ECHO)==0:
                 pulse_start_time = time.time()
 
