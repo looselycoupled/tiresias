@@ -4,7 +4,7 @@ from Adafruit_BNO055 import BNO055
 
 from tiresias.sensors.base import SensorBase
 
-MAX_STARTUP_ERRORS = 3
+MAX_STARTUP_ERRORS = 5
 SELF_TEST_GOOD = 15
 STATUS_GOOD = 5
 
@@ -28,7 +28,7 @@ class IMUSensor(SensorBase):
                 error_count += 1
                 if error_count >= MAX_STARTUP_ERRORS:
                     raise RuntimeError("cannot startup BNO055 sensor")
-                time.sleep(1)
+                time.sleep(2)
 
         # verify/report system status
         status, self_test, error = self.bno.get_system_status()
