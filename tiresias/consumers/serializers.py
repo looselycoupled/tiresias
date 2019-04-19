@@ -1,5 +1,5 @@
 # tiresias.consumers.serializers
-# module description
+# Consumers that save data to disk
 #
 # Author:   Allen Leis <allen.leis@gmail.com>
 # Created:  Tue Apr 16 19:39:10 2019 -0400
@@ -10,7 +10,7 @@
 # ID: serializers.py [] allen.leis@gmail.com $
 
 """
-module description
+Consumers that save data to disk
 """
 
 ##########################################################################

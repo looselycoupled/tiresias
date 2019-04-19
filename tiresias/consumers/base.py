@@ -1,5 +1,5 @@
-# tiresias.consumers
-# module description
+# tiresias.consumers.base
+# Base classes for data consumers
 #
 # Author:   Allen Leis <allen.leis@gmail.com>
 # Created:  Tue Apr 16 19:39:10 2019 -0400
@@ -7,10 +7,10 @@
 # Copyright (C) 2017 Allen Leis
 # For license information, see LICENSE
 #
-# ID: consumers.py [] allen.leis@gmail.com $
+# ID: base.py [] allen.leis@gmail.com $
 
 """
-module description
+Base classes for data consumers
 """
 
 ##########################################################################
@@ -24,6 +24,7 @@ from tiresias.utils.logger import LoggableMixin
 ##########################################################################
 
 class BaseConsumer(LoggableMixin):
+    """Base consumer class"""
 
     def __init__(self, *args, **kwargs):
         self.ready = False
