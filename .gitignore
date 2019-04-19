@@ -1,3 +1,6 @@
+# Project data and temp files
+data.json
+sandbox.py
 
 # OS trash
 .DS_Store
