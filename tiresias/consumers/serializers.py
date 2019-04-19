@@ -1,5 +1,5 @@
-# tiresias.consumers
-# module description
+# tiresias.consumers.serializers
+# Consumers that save data to disk
 #
 # Author:   Allen Leis <allen.leis@gmail.com>
 # Created:  Tue Apr 16 19:39:10 2019 -0400
@@ -7,10 +7,10 @@
 # Copyright (C) 2017 Allen Leis
 # For license information, see LICENSE
 #
-# ID: consumers.py [] allen.leis@gmail.com $
+# ID: serializers.py [] allen.leis@gmail.com $
 
 """
-module description
+Consumers that save data to disk
 """
 
 ##########################################################################
@@ -19,32 +19,14 @@ module description
 
 import json
 
-from tiresias.utils.logger import LoggableMixin
+from tiresias.consumers.base import BaseConsumer
 
 ##########################################################################
 # Classes
 ##########################################################################
 
-class BaseConsumer(LoggableMixin):
-
-    def __init__(self, *args, **kwargs):
-        self.ready = False
-        super(BaseConsumer, self).__init__(*args, **kwargs)
-
-    def setup(self, *args, **kwargs):
-        self.ready = True
-
-    def send(self, *args, **kwargs):
-        raise NotImplementedError()
-
-    def listen(self, *args, **kwargs):
-        raise NotImplementedError()
-
-    def shutdown(self, *args, **kwargs):
-        self.logger.info("{}: shutdown complete".format(self.__class__.__name__))
-
-
 class JSONConsumer(BaseConsumer):
+    """Writes data to a JSON file"""
 
     def __init__(self, filename="data.json", *args, **kwargs):
         self.filename = filename
