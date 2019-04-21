@@ -92,12 +92,12 @@ class IMUSensor(SensorBase):
         dict: a dictionary object containing calibration and status information
         """
         sys, gyro, accel, mag = self.bno.get_calibration_status()
-        self.logger.info("IMUSensor: calibration: sys: {}, gyro: {}, accel: {}, mag: {}".format(sys, gyro, accel, mag))
+        # self.logger.info("IMUSensor: calibration: system: {}, gyroscope: {}, accelerometer: {}, magnetometer: {}".format(sys, gyro, accel, mag))
         return {
-            "calibration": {
+            "imu_calibration": {
                 "system": sys,
                 "gyroscope": gyro,
-                "acceleromater": accel,
+                "accelerometer": accel,
                 "magnetometer": mag,
             }
         }
@@ -126,6 +126,7 @@ class IMUSensor(SensorBase):
                     self.logger.info("IMUSensor: exiting monitor")
                     break
                 data = self.read()
+                data.update(self.status())
                 output.put(data)
         except KeyboardInterrupt:
             pass
