@@ -130,7 +130,7 @@ class FlaskManager(LoggableMixin):
                         data.update(s.status())
 
                 socketio.emit('update', data)
-                time.sleep(.5)
+                time.sleep(.05)
 
         except KeyboardInterrupt:
             self.logger.info("Manager: exit requested")

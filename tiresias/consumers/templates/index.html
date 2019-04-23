@@ -148,7 +148,12 @@
             scaleLabel: {
               display: true,
               labelString: 'centimeters'
+            },
+            ticks: {
+              min: 0,
+              max: 400
             }
+
           }]
         },
         elements: {
@@ -156,7 +161,11 @@
               tension: 0 // disables bezier curves
           }
         },
-        showLines: false // disable for all datasets
+        showLines: false, // disable for all datasets
+        animation: {
+            duration: 0 // general animation time
+        },
+        responsiveAnimationDuration: 0 // animation duration after a resize
 
       }
     };
@@ -164,41 +173,9 @@
 
 
 
-    var color = Chart.helpers.color;
-    var euler_config = {
-      type: 'radar',
-      data: {
-        labels: ["Heading", "Pitch", "Roll"],
-        datasets: [{
-          label: 'Euler Angles',
-          backgroundColor: color(window.chartColors.blue).alpha(0.2).rgbString(),
-          borderColor: window.chartColors.blue,
-          pointBackgroundColor: window.chartColors.blue,
-          data: [
-            360, 20, 40
-          ]
-        }]
-      },
-      options: {
-        legend: {
-          position: 'top',
-        },
-        title: {
-          display: true,
-          text: 'Euler Angle Chart'
-        },
-        scale: {
-          ticks: {
-            beginAtZero: true
-          }
-        }
-      }
-    };
     window.onload = function() {
       var ctx = document.getElementById('canvas').getContext('2d');
       window.chart = new Chart(ctx, config);
-
-      window.euler_chart = new Chart(document.getElementById('euler_canvas'), euler_config);
     };
 
 
@@ -247,7 +224,7 @@
       var counter = 0;
       var listen = false
       var socket = io.connect('http://' + document.domain + ':' + location.port);
-      var max_points = 50
+      var max_points = 100
 
       socket.on( 'connect', function() {
         $( '#btn_start' ).on( 'click', function( e ) {
@@ -272,10 +249,6 @@
 
           if (true) {
             counter = 0;
-            // console.log(labels);
-            // console.log(data);
-            // console.log("");
-
             update_calibration(msg.imu_calibration);
 
             window.config.data.datasets[0].data = data.slice(Math.max(data.length - max_points, 0))
