@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
@@ -41,17 +42,57 @@
 
     <div class="row">
 
-      <form class="col" action="" method="POST">
-        <button id="btn_start" type="button" class="btn btn-success">Start</button>
-        <button id="btn_stop" type="button" class="btn btn-danger">Stop</button>
-      </form>
+      <div class="col-lg-3">
+
+        <div class="card mb-3" style="max-width: 18rem;">
+          <div class="card-header bg-info text-white">
+              Control
+          </div>
+          <div class="card-body">
+            <form class="" action="" method="POST">
+              <button id="btn_start" type="button" class="btn btn-success">Start</button>
+              <button id="btn_stop" type="button" class="btn btn-danger">Stop</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card" style="max-width: 18rem;">
+            <div class="card-header bg-secondary text-white">
+                Calibration
+            </div>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Accelerometer
+                      <span id="pill-accelerometer" class="badge badge-danger badge-pill">0</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Gyroscope
+                      <span id="pill-gyroscope" class="badge badge-danger badge-pill">0</span>
+                    </li>
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Magnetometer
+                      <span id="pill-magnetometer" class="badge badge-danger badge-pill">0</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <strong>System</strong>
+                      <span id="pill-system" class="badge badge-danger badge-pill">0</span>
+                    </li>
+                  </ul>
+          </div>
+
+        </div>
+
+
+        <div class="col">
+            <div class="data_display"></div>
+            <canvas id="canvas"></canvas>
+            <hr>
+            <canvas id="euler_canvas"></canvas>
+        </div>
 
     </div>
 
-    <div class="row">
-
-    <div class="col data_display"></div>
-    </div>
 
   </div>
 
@@ -59,31 +100,194 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+
+  <script>
+    window.chartColors = {
+      red: 'rgb(255, 99, 132)',
+      orange: 'rgb(255, 159, 64)',
+      yellow: 'rgb(255, 205, 86)',
+      green: 'rgb(75, 192, 192)',
+      blue: 'rgb(54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(201, 203, 207)'
+    };
+
+    var config = {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Distance',
+            backgroundColor: window.chartColors.red,
+            borderColor: window.chartColors.red,
+            data: [
+
+            ],
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        title: {
+          display: true,
+          text: 'Distance Chart'
+        },
+        scales: {
+          xAxes: [{
+            display: false,
+            scaleLabel: {
+              display: true,
+              labelString: 'Time'
+            }
+          }],
+          yAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'centimeters'
+            }
+          }]
+        },
+        elements: {
+          line: {
+              tension: 0 // disables bezier curves
+          }
+        },
+        showLines: false // disable for all datasets
+
+      }
+    };
+
+
+
+
+    var color = Chart.helpers.color;
+    var euler_config = {
+      type: 'radar',
+      data: {
+        labels: ["Heading", "Pitch", "Roll"],
+        datasets: [{
+          label: 'Euler Angles',
+          backgroundColor: color(window.chartColors.blue).alpha(0.2).rgbString(),
+          borderColor: window.chartColors.blue,
+          pointBackgroundColor: window.chartColors.blue,
+          data: [
+            360, 20, 40
+          ]
+        }]
+      },
+      options: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Euler Angle Chart'
+        },
+        scale: {
+          ticks: {
+            beginAtZero: true
+          }
+        }
+      }
+    };
+    window.onload = function() {
+      var ctx = document.getElementById('canvas').getContext('2d');
+      window.chart = new Chart(ctx, config);
+
+      window.euler_chart = new Chart(document.getElementById('euler_canvas'), euler_config);
+    };
+
+
+
+    // window.config.data.datasets[0].data.push(4); window.chart.update();
+    // window.chart.update();
+
+  </script>
+
 
   <script type="text/javascript">
+
+      function pill_class(val) {
+        switch (val) {
+          case 3:
+            return "badge-success"
+          case 2:
+          case 1:
+            return "badge-warning"
+          default:
+            return "badge-danger"
+        }
+      }
+
+      function update_calibration(data) {
+        all_classes = "badge-success badge-warning badge-danger"
+        $( '#pill-accelerometer' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.accelerometer))
+            .html(data.accelerometer);
+        $( '#pill-gyroscope' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.gyroscope))
+            .html(data.gyroscope);
+        $( '#pill-magnetometer' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.magnetometer))
+            .html(data.magnetometer);
+        $( '#pill-system' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.system))
+            .html(data.system);
+      }
+
+
+      var counter = 0;
       var listen = false
       var socket = io.connect('http://' + document.domain + ':' + location.port);
-      socket.on( 'connect', function() {
+      var max_points = 50
 
+      socket.on( 'connect', function() {
         $( '#btn_start' ).on( 'click', function( e ) {
           e.preventDefault()
           listen = true
         })
-
         $( '#btn_stop' ).on( 'click', function( e ) {
           e.preventDefault()
           listen = false
         })
-
       })
 
       socket.on( 'update', function( msg ) {
-        // console.log( msg )
         if (listen == true) {
-          $( 'div.data_display' ).append( '<div>' + JSON.stringify(msg) + '</div>' )
+          counter += 1;
+          $( 'div.data_display' ).html( JSON.stringify(msg) )
+
+          var data = window.config.data.datasets[0].data;
+          var labels = window.config.data.labels;
+          data.push(msg.distance.cm);
+          labels.push(msg.time.start);
+
+          if (true) {
+            counter = 0;
+            // console.log(labels);
+            // console.log(data);
+            // console.log("");
+
+            update_calibration(msg.imu_calibration);
+
+            window.config.data.datasets[0].data = data.slice(Math.max(data.length - max_points, 0))
+            window.config.data.labels = labels.slice(Math.max(labels.length - max_points, 0))
+            window.chart.update();
+          }
+
         }
       })
 
-  </script>
+
+	</script>
+
 </body>
 </html>
