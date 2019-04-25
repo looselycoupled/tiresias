@@ -89,13 +89,27 @@
 
 
         <div class="col">
-            <!-- <div class="data_display"></div> -->
-            <canvas id="canvas"></canvas>
-            <hr>
-            <!-- <canvas id="euler_canvas"></canvas>
-            <hr> -->
-            <div class="" id="renderer"></div>
+          <div class="row">
+            <div class="col">
+              <canvas id="canvas"></canvas>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <div class="col-6">
+                <div class="" id="renderer"></div>
+            </div>
+            <div class="col-6">
+                <div style="height: 300px">
+                    <canvas id="angle_canvas"></canvas>
+                </div>
+            </div>
+          </div>
+
+          <!-- <canvas id="euler_canvas"></canvas>
+          <hr> -->
+
         </div>
+
 
     </div>
 
@@ -135,12 +149,10 @@
         labels: [],
         datasets: [
           {
-            label: 'Distance',
+            label: 'centimeters',
             backgroundColor: window.chartColors.red,
             borderColor: window.chartColors.red,
-            data: [
-
-            ],
+            data: [],
             fill: false,
           }
         ]
@@ -182,16 +194,62 @@
             duration: 0 // general animation time
         },
         responsiveAnimationDuration: 0 // animation duration after a resize
+      }
+    };
+
+    var angle_config = {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+        {
+            label: 'X',
+            backgroundColor: window.chartColors.red,
+            borderColor: window.chartColors.red,
+            data: [],
+            fill: false,
+          },
+          {
+            label: 'Y',
+            backgroundColor: window.chartColors.blue,
+            borderColor: window.chartColors.blue,
+            data: [],
+            fill: false,
+          },
+          {
+            label: 'Z',
+            backgroundColor: window.chartColors.green,
+            borderColor: window.chartColors.green,
+            data: [],
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              max: 100
+            }
+          }]
+        },
+        title: {
+          display: true,
+          text: 'Linear Acceleration'
+        },
+        maintainAspectRatio: false
 
       }
     };
 
 
-
-
     window.onload = function() {
       var ctx = document.getElementById('canvas').getContext('2d');
       window.chart = new Chart(ctx, config);
+      var ctx = document.getElementById('angle_canvas').getContext('2d');
+      window.angle_chart = new Chart(ctx, angle_config);
     };
 
 
@@ -289,8 +347,8 @@
   $(document).ready(function() {
     // Configuration
     // Set size of the WebGL renderer scene.
-    var sceneWidth = 640;
-    var sceneHeight = 480;
+    var sceneWidth = 400;
+    var sceneHeight = 300;
 
     // Define list of 3D models.  Each item should have a name property that
     // will be rendered in the drop down, and a load function that is called
