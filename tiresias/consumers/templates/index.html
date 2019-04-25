@@ -88,7 +88,9 @@
             <div class="data_display"></div>
             <canvas id="canvas"></canvas>
             <hr>
-            <canvas id="euler_canvas"></canvas>
+            <!-- <canvas id="euler_canvas"></canvas>
+            <hr> -->
+            <div class="" id="renderer"></div>
         </div>
 
     </div>
@@ -101,6 +103,16 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+
+  <script src="/static/js/three.min.js"></script>
+  <script src="/static/js/DDSLoader.js"></script>
+  <script src="/static/js/MTLLoader.js"></script>
+  <script src="/static/js/OBJMTLLoader.js"></script>
+  <script src="/static/js/OBJLoader.js"></script>
+  <script src="/static/js/STLLoader.js"></script>
+
+
+
 
   <script>
     window.chartColors = {
@@ -187,6 +199,7 @@
 
 
   <script type="text/javascript">
+    var quaternion_data = null;
 
       function pill_class(val) {
         switch (val) {
@@ -256,11 +269,167 @@
             window.chart.update();
           }
 
+          quaternion_data = msg.quaternion
+
         }
       })
 
 
 	</script>
 
+
+
+<script>
+  var gmodels = null
+  // window.onload = function() {
+  $(document).ready(function() {
+    // Configuration
+    // Set size of the WebGL renderer scene.
+    var sceneWidth = 640;
+    var sceneHeight = 480;
+
+    // Define list of 3D models.  Each item should have a name property that
+    // will be rendered in the drop down, and a load function that is called
+    // with the model instance and should add a model property with a Three.js
+    // scene graph object that will be rendered.
+    var models = [
+      {
+        name: 'Bunny',
+        load: function(model) {
+          objMTLLoader.load(
+            "static/bunny.obj",
+            "static/bunny.mtl",
+            function(object) {
+              var geom = object.children[1].geometry;
+              // Rebuild geometry normals because they aren't loaded properly.
+              geom.computeFaceNormals();
+              geom.computeVertexNormals();
+              // Build bunny mesh from geometry and material.
+              model.model = new THREE.Mesh(geom, material);
+              // Move the bunny so it's roughly in the center of the screen.
+              model.model.position.y = -4;
+            }
+          );
+        }
+      },
+      {
+        name: 'Cat Statue',
+        load: function(model) {
+          stlLoader.load(
+            "static/cat-top.stl",
+            function(geometry) {
+              // Regenerate normals because they aren't loaded properly.
+              geometry.computeFaceNormals();
+              geometry.computeVertexNormals();
+              // Load the model and build mesh.
+              model.model = new THREE.Mesh(geometry, material);
+              // Rotate, scale, and move so the cat is facing out the screen.
+              model.model.rotation.x = -90 * (Math.PI / 180.0);
+              model.model.scale.set(0.17, 0.17, 0.17);
+              model.model.position.y = -5;
+            }
+          );
+        }
+      },
+      {
+        name: 'XYZ Axes',
+        load: function(model) {
+          // Build some cylinders and rotate them to form a cross of the XYZ axes.
+          model.model = new THREE.Group();
+          var xAxis = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 7, 32, 32),
+                                         material);
+          xAxis.rotation.z = 90.0*(Math.PI/180.0);
+          model.model.add(xAxis);
+          var yAxis = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 7, 32, 32),
+                                         material);
+          model.model.add(yAxis);
+          var zAxis = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 7, 32, 32),
+                                         material);
+          zAxis.rotation.x = 90.0*(Math.PI/180.0);
+          model.model.add(zAxis);
+        }
+      }
+    ];
+    gmodels = models;
+
+    // Global state.
+    var bnoData = null;
+    var offset = null;
+    var orientation = null;
+    var objMTLLoader = new THREE.OBJMTLLoader();
+    var stlLoader = new THREE.STLLoader();
+    var currentModel = null;
+    // Start with main controls hidden until connected.
+    // $('#controls').hide();
+
+    // Setup Three.js scene and camera.
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, sceneWidth / sceneHeight, 0.1, 1000);
+
+    // Start with the camera moved back a bit to look directly at the origin.
+    camera.position.z = 10;
+
+    // Setup Three.js WebGL renderer and add it to the page.
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(sceneWidth, sceneHeight);
+    renderer.setClearColor(0xff0000, 0);
+    $('#renderer').append(renderer.domElement);
+    $('#renderer canvas').addClass('center-block');  // Center the renderer.
+
+    // Create white material for the models.
+    var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+
+    // Setup 3 point lighting with a red and blue point light in upper left
+    // and right corners, plus a bit of backlight from the rear forward.
+    var pointLight1 = new THREE.PointLight(0xffdddd, 0.6);
+    pointLight1.position.set(40, 15, 40);
+    scene.add(pointLight1);
+    var pointLight2 = new THREE.PointLight(0xddddff, 0.6);
+    pointLight2.position.set(-40, 15, 40);
+    scene.add(pointLight2);
+    var backLight = new THREE.DirectionalLight(0xffff, 0.3);
+    backLight.position.set(0, -0.25, -1);
+    scene.add(backLight);
+
+    // Create a couple groups to apply rotations to the 3D model at different
+    // stages.  The outer group called offset is set to the reverse rotation
+    // of the current BNO orientation when the 'Straighten' button is clicked.
+    // This will force the model to center itself staring directly out of
+    // the screen.  The inner group called orientation will be rotated with
+    // the current BNO sensor orientation and cause the model to rotate.
+    offset = new THREE.Group();
+    orientation = new THREE.Group();
+    offset.add(orientation);
+    scene.add(offset);
+
+    // Main rendering function.
+    function render() {
+      requestAnimationFrame(render);
+
+      // Switch to the first model once it's loaded.
+      if (currentModel === null) {
+        if (models[1].hasOwnProperty('model')) {
+          currentModel = 1;
+          orientation.add(models[1].model);
+        }
+      }
+      // Update the orientation with the last BNO sensor reading quaternion.
+      if (quaternion_data !== null) {
+       orientation.quaternion.set(quaternion_data.x, quaternion_data.y, quaternion_data.z, quaternion_data.w);
+      }
+      renderer.render(scene, camera);
+    }
+    render();
+
+
+    // Populate drop-down of 3D models and load all the models..
+    $.each(models, function(index, model) {
+      model.load(model);
+    });
+
+  });
+
+
+  </script>
 </body>
 </html>

@@ -4,7 +4,7 @@ from tiresias.utils.logger import LoggableMixin
 
 # For Demo
 import threading
-from flask import Flask, render_template
+from flask import Flask, render_template, request, send_from_directory
 from flask_socketio import SocketIO
 
 
@@ -83,7 +83,7 @@ class Manager(LoggableMixin):
 # Flask
 ##########################################################################
 
-app = Flask(__name__, template_folder="consumers/templates")
+app = Flask(__name__, template_folder="consumers/templates", static_url_path="static/")
 app.config['SECRET_KEY'] = '4949f8f5beb339df992906c4218714e4#'
 socketio = SocketIO(app)
 thread = None
@@ -91,6 +91,11 @@ thread = None
 @app.route('/')
 def render_index():
     return render_template('index.html')
+
+@app.route('/js/<path:path>')
+def send_js(path):
+    return send_from_directory('static', path)
+
 
 class FlaskManager(LoggableMixin):
 
