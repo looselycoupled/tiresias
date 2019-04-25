@@ -44,19 +44,23 @@
 
       <div class="col-lg-3">
 
-        <div class="card mb-3" style="max-width: 18rem;">
-          <div class="card-header bg-info text-white">
+        <div class="card mb-3" >
+          <div class="card-header bg-secondary text-white">
               Control
           </div>
           <div class="card-body">
             <form class="" action="" method="POST">
               <button id="btn_start" type="button" class="btn btn-success">Start</button>
               <button id="btn_stop" type="button" class="btn btn-danger">Stop</button>
+
+              <p>
+                <button id="straighten" type="button" class="btn btn-light mt-3">Reset Model</button>
+              </p>
             </form>
           </div>
         </div>
 
-        <div class="card" style="max-width: 18rem;">
+        <div class="card" >
             <div class="card-header bg-secondary text-white">
                 Calibration
             </div>
@@ -85,7 +89,7 @@
 
 
         <div class="col">
-            <div class="data_display"></div>
+            <!-- <div class="data_display"></div> -->
             <canvas id="canvas"></canvas>
             <hr>
             <!-- <canvas id="euler_canvas"></canvas>
@@ -163,7 +167,7 @@
             },
             ticks: {
               min: 0,
-              max: 400
+              max: 300
             }
 
           }]
@@ -253,7 +257,7 @@
       socket.on( 'update', function( msg ) {
         if (listen == true) {
           counter += 1;
-          $( 'div.data_display' ).html( JSON.stringify(msg) )
+          // $( 'div.data_display' ).html( JSON.stringify(msg) )
 
           var data = window.config.data.datasets[0].data;
           var labels = window.config.data.labels;
@@ -415,7 +419,30 @@
       }
       // Update the orientation with the last BNO sensor reading quaternion.
       if (quaternion_data !== null) {
-       orientation.quaternion.set(quaternion_data.x, quaternion_data.y, quaternion_data.z, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.x, quaternion_data.y, quaternion_data.z, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.x, quaternion_data.y, quaternion_data.w, quaternion_data.z);
+        orientation.quaternion.set(quaternion_data.x, quaternion_data.z, quaternion_data.y, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.x, quaternion_data.z, quaternion_data.w, quaternion_data.y);
+        // orientation.quaternion.set(quaternion_data.x, quaternion_data.w, quaternion_data.y, quaternion_data.z);
+        // orientation.quaternion.set(quaternion_data.x, quaternion_data.w, quaternion_data.z, quaternion_data.y);
+        // orientation.quaternion.set(quaternion_data.y, quaternion_data.x, quaternion_data.z, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.y, quaternion_data.x, quaternion_data.w, quaternion_data.z);
+        // orientation.quaternion.set(quaternion_data.y, quaternion_data.z, quaternion_data.x, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.y, quaternion_data.z, quaternion_data.w, quaternion_data.x);
+        // orientation.quaternion.set(quaternion_data.y, quaternion_data.w, quaternion_data.x, quaternion_data.z);
+        // orientation.quaternion.set(quaternion_data.y, quaternion_data.w, quaternion_data.z, quaternion_data.x);
+        // orientation.quaternion.set(quaternion_data.z, quaternion_data.x, quaternion_data.y, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.z, quaternion_data.x, quaternion_data.w, quaternion_data.y);
+        // orientation.quaternion.set(quaternion_data.z, quaternion_data.y, quaternion_data.x, quaternion_data.w);
+        // orientation.quaternion.set(quaternion_data.z, quaternion_data.y, quaternion_data.w, quaternion_data.x);
+        // orientation.quaternion.set(quaternion_data.z, quaternion_data.w, quaternion_data.x, quaternion_data.y);
+        // orientation.quaternion.set(quaternion_data.z, quaternion_data.w, quaternion_data.y, quaternion_data.x);
+        // orientation.quaternion.set(quaternion_data.w, quaternion_data.x, quaternion_data.y, quaternion_data.z);
+        // orientation.quaternion.set(quaternion_data.w, quaternion_data.x, quaternion_data.z, quaternion_data.y);
+        // orientation.quaternion.set(quaternion_data.w, quaternion_data.y, quaternion_data.x, quaternion_data.z);
+        // orientation.quaternion.set(quaternion_data.w, quaternion_data.y, quaternion_data.z, quaternion_data.x);
+        // orientation.quaternion.set(quaternion_data.w, quaternion_data.z, quaternion_data.x, quaternion_data.y);
+        // orientation.quaternion.set(quaternion_data.w, quaternion_data.z, quaternion_data.y, quaternion_data.x);
       }
       renderer.render(scene, camera);
     }
@@ -425,6 +452,16 @@
     // Populate drop-down of 3D models and load all the models..
     $.each(models, function(index, model) {
       model.load(model);
+    });
+
+    // Straighten button click handler.
+    $('#straighten').click(function() {
+      // Get the current orientation of the BNO sensor and compute its
+      // conjugate or reverse rotation and apply it to the offset group.
+      // This will reset the 3D model so that it faces directly forward based
+      // on the current BNO sensor orientation.
+      var currentQuat = new THREE.Quaternion(quaternion_data.x, quaternion_data.z, quaternion_data.y, quaternion_data.w);
+      offset.quaternion.copy(currentQuat.conjugate());
     });
 
   });
