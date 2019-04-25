@@ -90,18 +90,40 @@
 
         <div class="col">
           <div class="row">
+
             <div class="col">
-              <canvas id="canvas"></canvas>
+                <div class="card">
+                    <div class="card-header">
+                      Object Detection
+                    </div>
+                    <div class="card-body">
+                        <canvas id="canvas" ></canvas>
+                      </div>
+                  </div>
             </div>
+
+
           </div>
           <div class="row mt-4">
             <div class="col-6">
-                <div class="" id="renderer"></div>
+                <div class="card">
+                    <div class="card-header">
+                      Orientation
+                    </div>
+                        <div class="card-body" id="renderer" style="padding: 0"></div>
+                  </div>
             </div>
             <div class="col-6">
-                <div style="height: 300px">
-                    <canvas id="angle_canvas"></canvas>
-                </div>
+                <div class="card">
+                    <div class="card-header">
+                      Linear Acceleration
+                    </div>
+                    <div class="card-body" style="padding-top: 10px; padding-bottom: 10px;">
+                        <div style="height: 290px">
+                            <canvas id="angle_canvas"></canvas>
+                        </div>
+                              </div>
+                  </div>
             </div>
           </div>
 
@@ -149,7 +171,7 @@
         labels: [],
         datasets: [
           {
-            label: 'centimeters',
+            label: 'Ultrasonic Ranger',
             backgroundColor: window.chartColors.red,
             borderColor: window.chartColors.red,
             data: [],
@@ -160,7 +182,7 @@
       options: {
         responsive: true,
         title: {
-          display: true,
+          display: false,
           text: 'Distance Chart'
         },
         scales: {
@@ -236,7 +258,7 @@
           }]
         },
         title: {
-          display: true,
+          display: false,
           text: 'Linear Acceleration'
         },
         maintainAspectRatio: false
@@ -347,7 +369,7 @@
   $(document).ready(function() {
     // Configuration
     // Set size of the WebGL renderer scene.
-    var sceneWidth = 400;
+    var sceneWidth = 397;
     var sceneHeight = 300;
 
     // Define list of 3D models.  Each item should have a name property that
