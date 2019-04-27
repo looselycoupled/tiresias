@@ -233,10 +233,13 @@
       options: {
         responsive: true,
         scales: {
+          xAxes: [{
+            display: false,
+          }],
           yAxes: [{
             ticks: {
-              min: 0,
-              max: 100
+              min: -3,
+              max: 3
             }
           }]
         },
@@ -244,7 +247,17 @@
           display: false,
           text: 'Linear Acceleration'
         },
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        elements: {
+          line: {
+              tension: 0 // disables bezier curves
+          }
+        },
+        showLines: false, // disable for all datasets
+        // animation: {
+        //     duration: 0 // general animation time
+        // },
+        responsiveAnimationDuration: 0 // animation duration after a resize
 
       }
     };
@@ -295,10 +308,10 @@
       }
 
 
-      var counter = 0;
       var listen = false;
       var socket = io.connect('http://' + document.domain + ':' + location.port);
       var max_points = 100;
+      var angle_max_points = 40;
 
       socket.on( 'connect', function() {
         $( '#btn_start' ).on( 'click', function( e ) {
@@ -313,24 +326,40 @@
 
       socket.on( 'update', function( msg ) {
         if (listen == true) {
-          counter += 1;
           // $( 'div.data_display' ).html( JSON.stringify(msg) )
 
-          var data = window.config.data.datasets[0].data;
+          var data   = window.config.data.datasets[0].data;
+          var dataX  = window.angle_config.data.datasets[0].data;
+          var dataY  = window.angle_config.data.datasets[1].data;
+          var dataZ  = window.angle_config.data.datasets[2].data;
           var labels = window.config.data.labels;
-          data.push(msg.distance.cm);
+          var labelsLA = window.angle_config.data.labels;
+
+          // add labels/time to both charts
           labels.push(msg.time.start);
+          labelsLA.push(msg.time.start);
 
-          if (true) {
-            counter = 0;
-            update_calibration(msg.imu_calibration);
+          // add data to sensor chart and trim data/label arrays
+          data.push(msg.distance.cm);
+          window.config.data.datasets[0].data = data.slice(Math.max(data.length - max_points, 0));
+          window.config.data.labels = labels.slice(Math.max(labels.length - max_points, 0));
 
-            window.config.data.datasets[0].data = data.slice(Math.max(data.length - max_points, 0))
-            window.config.data.labels = labels.slice(Math.max(labels.length - max_points, 0))
-            window.chart.update();
-          }
+          // console.log(msg.linear_acceleration);
+          // console.log(msg.linear_acceleration.x);
+          dataX.push(msg.linear_acceleration.x);
+          dataY.push(msg.linear_acceleration.y);
+          dataZ.push(msg.linear_acceleration.z);
+
+          window.angle_config.data.datasets[0].data = dataX.slice(Math.max(dataX.length - angle_max_points, 0));
+          window.angle_config.data.datasets[1].data = dataY.slice(Math.max(dataY.length - angle_max_points, 0));
+          window.angle_config.data.datasets[2].data = dataZ.slice(Math.max(dataZ.length - angle_max_points, 0));
+          window.angle_config.data.labels = labelsLA.slice(Math.max(labelsLA.length - angle_max_points, 0));
+
+          window.angle_chart.update();
+          window.chart.update();
 
           quaternion_data = msg.quaternion
+          update_calibration(msg.imu_calibration);
 
         }
       });
