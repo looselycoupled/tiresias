@@ -54,6 +54,7 @@
 
               <p>
                 <button id="straighten" type="button" class="btn btn-light mt-3">Reset Model</button>
+                <button id="reset_log" type="button" class="btn btn-light mt-3">Reset Log</button>
               </p>
             </form>
           </div>
@@ -124,7 +125,8 @@
     </div>
   </div>
 
-  <script src="/static/js/jquery-3.3.1.slim.min.js"></script>
+  <!-- <script src="/static/js/jquery-3.3.1.slim.min.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
   <script src="/static/js/popper.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
   <script src="/static/js/socket.io.min.js"></script>
@@ -263,17 +265,30 @@
     };
 
     window.onload = function() {
+      // setup charts
       var ctx = document.getElementById('canvas').getContext('2d');
       window.chart = new Chart(ctx, config);
+
       var ctx = document.getElementById('angle_canvas').getContext('2d');
       window.angle_chart = new Chart(ctx, angle_config);
+
+      // straighten model
+      $('#straighten').click(function() {
+        var currentQuat = new THREE.Quaternion(quaternion_data.x, quaternion_data.z, quaternion_data.y, quaternion_data.w);
+        offset.quaternion.copy(currentQuat.conjugate());
+      });
+
+      // tell server to reset log file
+      $('#reset_log').click(function() {
+        $.post("/reset");
+      });
     };
 
   </script>
 
 
   <script type="text/javascript">
-    var quaternion_data = null;
+      var quaternion_data = null;
 
       function pill_class(val) {
         switch (val) {
@@ -326,7 +341,6 @@
 
       socket.on( 'update', function( msg ) {
         if (listen == true) {
-          // $( 'div.data_display' ).html( JSON.stringify(msg) )
 
           var data   = window.config.data.datasets[0].data;
           var dataX  = window.angle_config.data.datasets[0].data;
@@ -344,8 +358,6 @@
           window.config.data.datasets[0].data = data.slice(Math.max(data.length - max_points, 0));
           window.config.data.labels = labels.slice(Math.max(labels.length - max_points, 0));
 
-          // console.log(msg.linear_acceleration);
-          // console.log(msg.linear_acceleration.x);
           dataX.push(msg.linear_acceleration.x);
           dataY.push(msg.linear_acceleration.y);
           dataZ.push(msg.linear_acceleration.z);
@@ -360,16 +372,18 @@
 
           quaternion_data = msg.quaternion
           update_calibration(msg.imu_calibration);
-
         }
       });
+
 	</script>
 
   <script>
+  // simple switch to turn off 3d model code
+  if false {
     var gmodels = null
-    // window.onload = function() {
     $(document).ready(function() {
       // Configuration
+
       // Set size of the WebGL renderer scene.
       var sceneWidth = 397;
       var sceneHeight = 300;
@@ -445,8 +459,6 @@
       var objMTLLoader = new THREE.OBJMTLLoader();
       var stlLoader = new THREE.STLLoader();
       var currentModel = null;
-      // Start with main controls hidden until connected.
-      // $('#controls').hide();
 
       // Setup Three.js scene and camera.
       var scene = new THREE.Scene();
@@ -531,23 +543,13 @@
       render();
 
 
-      // Populate drop-down of 3D models and load all the models..
+      // load all the models..
       $.each(models, function(index, model) {
         model.load(model);
       });
 
-      // Straighten button click handler.
-      $('#straighten').click(function() {
-        // Get the current orientation of the BNO sensor and compute its
-        // conjugate or reverse rotation and apply it to the offset group.
-        // This will reset the 3D model so that it faces directly forward based
-        // on the current BNO sensor orientation.
-        var currentQuat = new THREE.Quaternion(quaternion_data.x, quaternion_data.z, quaternion_data.y, quaternion_data.w);
-        offset.quaternion.copy(currentQuat.conjugate());
-      });
-
     });
-
+  };
   </script>
 </body>
 </html>

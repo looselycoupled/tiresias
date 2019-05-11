@@ -16,7 +16,7 @@ def main():
 
 def single_process_main():
     sensors = [IMUSensor(), UltrasonicRangingSensor()]
-    consumers = []
+    consumers = [JSONConsumer()]
     manager = FlaskManager(sensors, consumers)
     manager.start()
 
