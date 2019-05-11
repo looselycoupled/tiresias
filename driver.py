@@ -2,7 +2,7 @@ import argparse
 
 from tiresias.sensors.imu import IMUSensor
 from tiresias.sensors.distance import UltrasonicRangingSensor
-from tiresias.manager import Manager, FlaskManager
+from tiresias.managers import Manager, FlaskManager
 from tiresias.consumers.serializers import JSONConsumer
 from tiresias.consumers.web import FlaskConsumer
 
