@@ -5,7 +5,7 @@ SHELL := /bin/bash
 PROJECT := tiresias
 
 # Export targets not associated with files
-.PHONY: clean
+.PHONY: clean archive
 
 # Clean build files
 clean:
@@ -17,3 +17,7 @@ clean:
 	-rm -rf dist
 	-rm -rf $(PROJECT).egg-info
 	-rm -rf .eggs
+
+archive:
+	zip -r data-`date +%F-%H%M%S.zip` data/*
+	-rm -rf data/

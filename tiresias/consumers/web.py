@@ -19,18 +19,13 @@ Consumers to render sensor data in a website
 
 import json
 import time
-
 import threading
 import random
-
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 
 from tiresias.consumers.base import BaseConsumer
-
-sensor_data_changed = threading.Condition()
-sensor_data = {}
 
 ##########################################################################
 # Flask
@@ -75,18 +70,17 @@ class FlaskConsumer(BaseConsumer):
         active_connections -= 1
 
     def read_queue(self, queue):
-        global sensor_data
         global socketio
 
+        counter = 0
         while True:
+            counter += 1
             sensor_data = queue.get()
-            with sensor_data_changed:
 
-                # Notify any waiting threads
-                sensor_data_changed.notifyAll()
-
-                if active_connections > 0:
+            if active_connections > 0:
+                if counter % 10 == 0:
                     socketio.emit('update', sensor_data)
+                    counter = 0
 
 
     def listen(self, queue):
@@ -95,4 +89,4 @@ class FlaskConsumer(BaseConsumer):
         self.thread.daemon = True
         self.thread.start()
 
-        socketio.run(app, host="0.0.0.0", debug=True)
+        socketio.run(app, host="0.0.0.0", debug=False)

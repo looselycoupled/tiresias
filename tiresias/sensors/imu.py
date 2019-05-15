@@ -61,6 +61,7 @@ class IMUSensor(SensorBase):
         """
         heading, roll, pitch = self.bno.read_euler()
         x,y,z = self.bno.read_linear_acceleration()
+        qx, qy, qz, qw = self.bno.read_quaternion()
 
         if fmt == "raw":
             return heading, roll, pitch, x, y, z
@@ -71,6 +72,12 @@ class IMUSensor(SensorBase):
                     "heading": heading,
                     "roll": roll,
                     "pitch": pitch,
+                },
+                "quaternion": {
+                    "x": qx,
+                    "y": qy,
+                    "z": qz,
+                    "w": qw,
                 },
                 "linear_acceleration": {
                     "x": x,

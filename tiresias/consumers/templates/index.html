@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/Chart.min.css">
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
     <style>
       body {
         padding-top: 5rem;
@@ -41,49 +41,515 @@
 
     <div class="row">
 
-      <form class="col" action="" method="POST">
-        <button id="btn_start" type="button" class="btn btn-success">Start</button>
-        <button id="btn_stop" type="button" class="btn btn-danger">Stop</button>
-      </form>
+      <div class="col-lg-3">
+
+        <div class="card mb-3" >
+          <div class="card-header bg-secondary text-white">
+              Control
+          </div>
+          <div class="card-body">
+            <form class="" action="" method="POST">
+              <button id="btn_start" type="button" class="btn btn-success">Start</button>
+              <button id="btn_stop" type="button" class="btn btn-danger">Stop</button>
+
+              <p>
+                <button id="straighten" type="button" class="btn btn-light mt-3">Reset Model</button>
+                <button id="reset_log" type="button" class="btn btn-light mt-3">Reset Log</button>
+              </p>
+            </form>
+          </div>
+        </div>
+
+        <div class="card" >
+            <div class="card-header bg-secondary text-white">
+                Calibration
+            </div>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Accelerometer
+                      <span id="pill-accelerometer" class="badge badge-danger badge-pill">0</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Gyroscope
+                      <span id="pill-gyroscope" class="badge badge-danger badge-pill">0</span>
+                    </li>
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Magnetometer
+                      <span id="pill-magnetometer" class="badge badge-danger badge-pill">0</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <strong>System</strong>
+                      <span id="pill-system" class="badge badge-danger badge-pill">0</span>
+                    </li>
+                  </ul>
+          </div>
+
+        </div>
+
+
+        <div class="col">
+
+          <div class="row">
+
+            <div class="col">
+              <div class="card">
+                <div class="card-header">Object Detection</div>
+                <div class="card-body"><canvas id="canvas" ></canvas></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+
+            <div class="col-6">
+              <div class="card">
+                <div class="card-header">Orientation</div>
+                <div class="card-body" id="renderer" style="padding: 0"></div>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="card">
+                <div class="card-header">Linear Acceleration</div>
+                <div class="card-body" style="padding-top: 10px; padding-bottom: 10px;">
+                  <div style="height: 290px"><canvas id="angle_canvas"></canvas></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
 
     </div>
-
-    <div class="row">
-
-    <div class="col data_display"></div>
-    </div>
-
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <!-- <script src="/static/js/jquery-3.3.1.slim.min.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="/static/js/popper.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/socket.io.min.js"></script>
+  <script src="/static/js/Chart.bundle.min.js"></script>
+
+  <script src="/static/js/three.min.js"></script>
+  <script src="/static/js/DDSLoader.js"></script>
+  <script src="/static/js/MTLLoader.js"></script>
+  <script src="/static/js/OBJMTLLoader.js"></script>
+  <script src="/static/js/OBJLoader.js"></script>
+  <script src="/static/js/STLLoader.js"></script>
+
+  <script>
+    window.chartColors = {
+      red: 'rgb(255, 99, 132)',
+      orange: 'rgb(255, 159, 64)',
+      yellow: 'rgb(255, 205, 86)',
+      green: 'rgb(75, 192, 192)',
+      blue: 'rgb(54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(201, 203, 207)'
+    };
+
+    var config = {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Ultrasonic Ranger',
+            backgroundColor: window.chartColors.red,
+            borderColor: window.chartColors.red,
+            data: [],
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        title: {
+          display: false,
+          text: 'Distance Chart'
+        },
+        scales: {
+          xAxes: [{
+            display: false,
+            scaleLabel: {
+              display: true,
+              labelString: 'Time'
+            }
+          }],
+          yAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'centimeters'
+            },
+            ticks: {
+              min: 0,
+              max: 250
+            }
+
+          }]
+        },
+        elements: {
+          line: {
+              tension: 0 // disables bezier curves
+          }
+        },
+        showLines: false, // disable for all datasets
+        animation: {
+            duration: 0 // general animation time
+        },
+        responsiveAnimationDuration: 0 // animation duration after a resize
+      }
+    };
+
+    var angle_config = {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+        {
+            label: 'X',
+            backgroundColor: window.chartColors.red,
+            borderColor: window.chartColors.red,
+            data: [],
+            fill: false,
+          },
+          {
+            label: 'Y',
+            backgroundColor: window.chartColors.blue,
+            borderColor: window.chartColors.blue,
+            data: [],
+            fill: false,
+          },
+          {
+            label: 'Z',
+            backgroundColor: window.chartColors.green,
+            borderColor: window.chartColors.green,
+            data: [],
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          xAxes: [{
+            display: false,
+          }],
+          yAxes: [{
+            ticks: {
+              min: -3,
+              max: 3
+            }
+          }]
+        },
+        title: {
+          display: false,
+          text: 'Linear Acceleration'
+        },
+        maintainAspectRatio: false,
+        elements: {
+          line: {
+              tension: 0 // disables bezier curves
+          }
+        },
+        showLines: false, // disable for all datasets
+        // animation: {
+        //     duration: 0 // general animation time
+        // },
+        responsiveAnimationDuration: 0 // animation duration after a resize
+
+      }
+    };
+
+    window.onload = function() {
+      // setup charts
+      var ctx = document.getElementById('canvas').getContext('2d');
+      window.chart = new Chart(ctx, config);
+
+      var ctx = document.getElementById('angle_canvas').getContext('2d');
+      window.angle_chart = new Chart(ctx, angle_config);
+
+      // straighten model
+      $('#straighten').click(function() {
+        var currentQuat = new THREE.Quaternion(quaternion_data.x, quaternion_data.z, quaternion_data.y, quaternion_data.w);
+        offset.quaternion.copy(currentQuat.conjugate());
+      });
+
+      // tell server to reset log file
+      $('#reset_log').click(function() {
+        $.post("/reset");
+      });
+    };
+
+  </script>
+
 
   <script type="text/javascript">
-      var listen = false
-      var socket = io.connect('http://' + document.domain + ':' + location.port);
-      socket.on( 'connect', function() {
+      var quaternion_data = null;
 
+      function pill_class(val) {
+        switch (val) {
+          case 3:
+            return "badge-success"
+          case 2:
+          case 1:
+            return "badge-warning"
+          default:
+            return "badge-danger"
+        }
+      }
+
+      function update_calibration(data) {
+        all_classes = "badge-success badge-warning badge-danger"
+        $( '#pill-accelerometer' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.accelerometer))
+            .html(data.accelerometer);
+        $( '#pill-gyroscope' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.gyroscope))
+            .html(data.gyroscope);
+        $( '#pill-magnetometer' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.magnetometer))
+            .html(data.magnetometer);
+        $( '#pill-system' )
+            .removeClass( all_classes )
+            .addClass(pill_class(data.system))
+            .html(data.system);
+      }
+
+
+      var listen = false;
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      var max_points = 100;
+      var angle_max_points = 40;
+
+      socket.on( 'connect', function() {
         $( '#btn_start' ).on( 'click', function( e ) {
           e.preventDefault()
           listen = true
         })
-
         $( '#btn_stop' ).on( 'click', function( e ) {
           e.preventDefault()
           listen = false
         })
-
-      })
+      });
 
       socket.on( 'update', function( msg ) {
-        // console.log( msg )
         if (listen == true) {
-          $( 'div.data_display' ).append( '<div>' + JSON.stringify(msg) + '</div>' )
-        }
-      })
 
+          var data   = window.config.data.datasets[0].data;
+          var dataX  = window.angle_config.data.datasets[0].data;
+          var dataY  = window.angle_config.data.datasets[1].data;
+          var dataZ  = window.angle_config.data.datasets[2].data;
+          var labels = window.config.data.labels;
+          var labelsLA = window.angle_config.data.labels;
+
+          // add labels/time to both charts
+          labels.push(msg.time.start);
+          labelsLA.push(msg.time.start);
+
+          // add data to sensor chart and trim data/label arrays
+          data.push(msg.distance.cm);
+          window.config.data.datasets[0].data = data.slice(Math.max(data.length - max_points, 0));
+          window.config.data.labels = labels.slice(Math.max(labels.length - max_points, 0));
+
+          dataX.push(msg.linear_acceleration.x);
+          dataY.push(msg.linear_acceleration.y);
+          dataZ.push(msg.linear_acceleration.z);
+
+          window.angle_config.data.datasets[0].data = dataX.slice(Math.max(dataX.length - angle_max_points, 0));
+          window.angle_config.data.datasets[1].data = dataY.slice(Math.max(dataY.length - angle_max_points, 0));
+          window.angle_config.data.datasets[2].data = dataZ.slice(Math.max(dataZ.length - angle_max_points, 0));
+          window.angle_config.data.labels = labelsLA.slice(Math.max(labelsLA.length - angle_max_points, 0));
+
+          window.angle_chart.update();
+          window.chart.update();
+
+          quaternion_data = msg.quaternion
+          update_calibration(msg.imu_calibration);
+        }
+      });
+
+	</script>
+
+  <script>
+  // simple switch to turn off 3d model code
+  if false {
+    var gmodels = null
+    $(document).ready(function() {
+      // Configuration
+
+      // Set size of the WebGL renderer scene.
+      var sceneWidth = 397;
+      var sceneHeight = 300;
+
+      // Define list of 3D models.  Each item should have a name property that
+      // will be rendered in the drop down, and a load function that is called
+      // with the model instance and should add a model property with a Three.js
+      // scene graph object that will be rendered.
+      var models = [
+        {
+          name: 'Bunny',
+          load: function(model) {
+            objMTLLoader.load(
+              "static/bunny.obj",
+              "static/bunny.mtl",
+              function(object) {
+                var geom = object.children[1].geometry;
+                // Rebuild geometry normals because they aren't loaded properly.
+                geom.computeFaceNormals();
+                geom.computeVertexNormals();
+                // Build bunny mesh from geometry and material.
+                model.model = new THREE.Mesh(geom, material);
+                // Move the bunny so it's roughly in the center of the screen.
+                model.model.position.y = -4;
+              }
+            );
+          }
+        },
+        {
+          name: 'Cat Statue',
+          load: function(model) {
+            stlLoader.load(
+              "static/cat-top.stl",
+              function(geometry) {
+                // Regenerate normals because they aren't loaded properly.
+                geometry.computeFaceNormals();
+                geometry.computeVertexNormals();
+                // Load the model and build mesh.
+                model.model = new THREE.Mesh(geometry, material);
+                // Rotate, scale, and move so the cat is facing out the screen.
+                model.model.rotation.x = -90 * (Math.PI / 180.0);
+                model.model.scale.set(0.17, 0.17, 0.17);
+                model.model.position.y = -5;
+              }
+            );
+          }
+        },
+        {
+          name: 'XYZ Axes',
+          load: function(model) {
+            // Build some cylinders and rotate them to form a cross of the XYZ axes.
+            model.model = new THREE.Group();
+            var xAxis = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 7, 32, 32),
+                                           material);
+            xAxis.rotation.z = 90.0*(Math.PI/180.0);
+            model.model.add(xAxis);
+            var yAxis = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 7, 32, 32),
+                                           material);
+            model.model.add(yAxis);
+            var zAxis = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 7, 32, 32),
+                                           material);
+            zAxis.rotation.x = 90.0*(Math.PI/180.0);
+            model.model.add(zAxis);
+          }
+        }
+      ];
+      gmodels = models;
+
+      // Global state.
+      var bnoData = null;
+      var offset = null;
+      var orientation = null;
+      var objMTLLoader = new THREE.OBJMTLLoader();
+      var stlLoader = new THREE.STLLoader();
+      var currentModel = null;
+
+      // Setup Three.js scene and camera.
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(75, sceneWidth / sceneHeight, 0.1, 1000);
+
+      // Start with the camera moved back a bit to look directly at the origin.
+      camera.position.z = 10;
+
+      // Setup Three.js WebGL renderer and add it to the page.
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(sceneWidth, sceneHeight);
+      renderer.setClearColor(0xff0000, 0);
+      $('#renderer').append(renderer.domElement);
+      $('#renderer canvas').addClass('center-block');  // Center the renderer.
+
+      // Create white material for the models.
+      var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+
+      // Setup 3 point lighting with a red and blue point light in upper left
+      // and right corners, plus a bit of backlight from the rear forward.
+      var pointLight1 = new THREE.PointLight(0xffdddd, 0.6);
+      pointLight1.position.set(40, 15, 40);
+      scene.add(pointLight1);
+      var pointLight2 = new THREE.PointLight(0xddddff, 0.6);
+      pointLight2.position.set(-40, 15, 40);
+      scene.add(pointLight2);
+      var backLight = new THREE.DirectionalLight(0xffff, 0.3);
+      backLight.position.set(0, -0.25, -1);
+      scene.add(backLight);
+
+      // Create a couple groups to apply rotations to the 3D model at different
+      // stages.  The outer group called offset is set to the reverse rotation
+      // of the current BNO orientation when the 'Straighten' button is clicked.
+      // This will force the model to center itself staring directly out of
+      // the screen.  The inner group called orientation will be rotated with
+      // the current BNO sensor orientation and cause the model to rotate.
+      offset = new THREE.Group();
+      orientation = new THREE.Group();
+      offset.add(orientation);
+      scene.add(offset);
+
+      // Main rendering function.
+      function render() {
+        requestAnimationFrame(render);
+
+        // Switch to the first model once it's loaded.
+        if (currentModel === null) {
+          if (models[1].hasOwnProperty('model')) {
+            currentModel = 1;
+            orientation.add(models[1].model);
+          }
+        }
+        // Update the orientation with the last BNO sensor reading quaternion.
+        if (quaternion_data !== null) {
+          // orientation.quaternion.set(quaternion_data.x, quaternion_data.y, quaternion_data.z, quaternion_data.w);
+          // orientation.quaternion.set(quaternion_data.x, quaternion_data.y, quaternion_data.w, quaternion_data.z);
+          orientation.quaternion.set(quaternion_data.x, quaternion_data.z, quaternion_data.y, quaternion_data.w);
+          // orientation.quaternion.set(quaternion_data.x, quaternion_data.z, quaternion_data.w, quaternion_data.y);
+          // orientation.quaternion.set(quaternion_data.x, quaternion_data.w, quaternion_data.y, quaternion_data.z);
+          // orientation.quaternion.set(quaternion_data.x, quaternion_data.w, quaternion_data.z, quaternion_data.y);
+          // orientation.quaternion.set(quaternion_data.y, quaternion_data.x, quaternion_data.z, quaternion_data.w);
+          // orientation.quaternion.set(quaternion_data.y, quaternion_data.x, quaternion_data.w, quaternion_data.z);
+          // orientation.quaternion.set(quaternion_data.y, quaternion_data.z, quaternion_data.x, quaternion_data.w);
+          // orientation.quaternion.set(quaternion_data.y, quaternion_data.z, quaternion_data.w, quaternion_data.x);
+          // orientation.quaternion.set(quaternion_data.y, quaternion_data.w, quaternion_data.x, quaternion_data.z);
+          // orientation.quaternion.set(quaternion_data.y, quaternion_data.w, quaternion_data.z, quaternion_data.x);
+          // orientation.quaternion.set(quaternion_data.z, quaternion_data.x, quaternion_data.y, quaternion_data.w);
+          // orientation.quaternion.set(quaternion_data.z, quaternion_data.x, quaternion_data.w, quaternion_data.y);
+          // orientation.quaternion.set(quaternion_data.z, quaternion_data.y, quaternion_data.x, quaternion_data.w);
+          // orientation.quaternion.set(quaternion_data.z, quaternion_data.y, quaternion_data.w, quaternion_data.x);
+          // orientation.quaternion.set(quaternion_data.z, quaternion_data.w, quaternion_data.x, quaternion_data.y);
+          // orientation.quaternion.set(quaternion_data.z, quaternion_data.w, quaternion_data.y, quaternion_data.x);
+          // orientation.quaternion.set(quaternion_data.w, quaternion_data.x, quaternion_data.y, quaternion_data.z);
+          // orientation.quaternion.set(quaternion_data.w, quaternion_data.x, quaternion_data.z, quaternion_data.y);
+          // orientation.quaternion.set(quaternion_data.w, quaternion_data.y, quaternion_data.x, quaternion_data.z);
+          // orientation.quaternion.set(quaternion_data.w, quaternion_data.y, quaternion_data.z, quaternion_data.x);
+          // orientation.quaternion.set(quaternion_data.w, quaternion_data.z, quaternion_data.x, quaternion_data.y);
+          // orientation.quaternion.set(quaternion_data.w, quaternion_data.z, quaternion_data.y, quaternion_data.x);
+        }
+        renderer.render(scene, camera);
+      }
+      render();
+
+
+      // load all the models..
+      $.each(models, function(index, model) {
+        model.load(model);
+      });
+
+    });
+  };
   </script>
 </body>
 </html>
