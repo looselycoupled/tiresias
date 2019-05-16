@@ -24,6 +24,7 @@ import datetime
 from tiresias.consumers.base import BaseConsumer
 
 RESET_CMD = "RESET_CMD"
+TRASH_CMD = "TRASH_CMD"
 
 ##########################################################################
 # Classes
@@ -54,6 +55,12 @@ class JSONConsumer(BaseConsumer):
     def reset(self, *args, **kwargs):
         self.logger.info("JSONConsumer: closing file")
         self.file.close()
+        self.setup()
+
+    def trash(self, *args, **kwargs):
+        self.logger.info("JSONConsumer: trashing file")
+        self.file.close()
+        os.remove(self.file.name)
         self.setup()
 
     def send(self, data):

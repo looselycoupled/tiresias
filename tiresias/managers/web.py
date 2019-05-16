@@ -10,7 +10,8 @@ from flask_socketio import SocketIO
 SAMPLE_LOGGING_INTERVAL = 100
 SAMPLE_DURATION = 0.0096
 
-RESET_CMD = "RESET_CMD"
+RESET_CMD = "RESET_CMD" # start new data ingest
+TRASH_CMD = "TRASH_CMD" # throw away data ingest
 
 ##########################################################################
 # Flask
@@ -36,6 +37,12 @@ def render_index():
 def handle_consumer_reset():
     global client_command
     client_command = RESET_CMD
+    return jsonify({})
+
+@app.route('/trash', methods=['POST'])
+def handle_consumer_trash():
+    global client_command
+    client_command = TRASH_CMD
     return jsonify({})
 
 
@@ -66,11 +73,12 @@ class FlaskManager(LoggableMixin):
         thread.start()
 
         try:
-
+            rate = {"start": time.time(), "samples": 0}
             while True:
                 start = time.time()
                 data = {"time": { "start": int(start * 1e6), "scale": "microsecond"}}
 
+                # read data from sensors
                 for s in self.sensors:
                     data.update(s.read())
                     if hasattr(s, "status"):
@@ -79,14 +87,26 @@ class FlaskManager(LoggableMixin):
                 # send data to consumers
                 for c in self.consumers:
                     c.send(data)
+
+                    # send special command to consumer if requested
                     if client_command == RESET_CMD:
                         if hasattr(c, "reset"):
                             c.reset()
-
+                    if client_command == TRASH_CMD:
+                        if hasattr(c, "trash"):
+                            c.trash()
 
                 socketio.emit('update', data)
                 client_command = None
-                time.sleep(.05)
+
+                # keep track of samples per second
+                rate["samples"] += 1
+                if time.time() - rate["start"] > 1:
+                    self.logger.info("Manager: {} samples per second".format(rate["samples"]))
+                    rate = {"start": time.time(), "samples": 0}
+
+                # .0064 gets you about 50Hz
+                time.sleep(.0064)
 
         except KeyboardInterrupt:
             self.logger.info("Manager: exit requested")

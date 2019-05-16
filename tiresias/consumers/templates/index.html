@@ -53,8 +53,9 @@
               <button id="btn_stop" type="button" class="btn btn-danger">Stop</button>
 
               <p>
-                <button id="straighten" type="button" class="btn btn-light mt-3">Reset Model</button>
-                <button id="reset_log" type="button" class="btn btn-light mt-3">Reset Log</button>
+                <!-- <button id="straighten" type="button" class="btn btn-light mt-3">Reset Model</button> -->
+                <button id="reset_log" type="button" class="btn btn-light mt-3">New Log</button>
+                <button id="trash_log" type="button" class="btn btn-light mt-3">Trash Log</button>
               </p>
             </form>
           </div>
@@ -186,7 +187,7 @@
             },
             ticks: {
               min: 0,
-              max: 250
+              max: 100
             }
 
           }]
@@ -281,6 +282,10 @@
       // tell server to reset log file
       $('#reset_log').click(function() {
         $.post("/reset");
+      });
+      // tell server to reset log file
+      $('#trash_log').click(function() {
+        $.post("/trash");
       });
     };
 
